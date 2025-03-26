@@ -12,6 +12,12 @@ Antes de comenzar, asegúrate de tener instaladas las siguientes herramientas:
 - **Git** (si aún no lo tienes instalado, [descárgalo aquí](https://git-scm.com/)).
 - Una cuenta en [Vercel](https://vercel.com/) para el despliegue.
 
+Además, instala **pnpm** como tu gestor de paquetes preferido:
+
+```bash
+npm install -g pnpm
+```
+
 ## Paso 1: Inicializar el Proyecto Next.js con TypeScript
 
 ### 1.1 Crear el Proyecto
@@ -20,25 +26,27 @@ Antes de comenzar, asegúrate de tener instaladas las siguientes herramientas:
 2. Ejecuta el siguiente comando para crear un proyecto de Next.js con soporte para TypeScript:
 
   ```bash
-  npx create-next-app@latest survey-app --typescript
+  pnpm create next-app survey-app --typescript
   ```
+
+  Durante la configuración, selecciona las siguientes opciones recomendadas:
 
   ```text
-    √ Would you like to use ESLint? ... Yes
-    √ Would you like to use Tailwind CSS? ... Yes
-    √ Would you like your code inside a `src/` directory? ... Yes
-    √ Would you like to use App Router? (recommended) ... Yes
-    √ Would you like to use Turbopack for `next dev`? ... Yes
-    X Would you like to customize the import alias (`@/*` by default)? ...  No
+  √ Would you like to use ESLint? ... Yes
+  √ Would you like to use Tailwind CSS? ... Yes
+  √ Would you like your code inside a `src/` directory? ... Yes
+  √ Would you like to use App Router? (recommended) ... Yes
+  √ Would you like to use Turbopack for `next dev`? ... Yes
+  X Would you like to customize the import alias (`@/*` by default)? ... No
   ```
 
-   Esto generará un nuevo proyecto con la configuración básica de Next.js y TypeScript.
+  Esto generará un nuevo proyecto con la configuración básica de Next.js y TypeScript.
 
 3. Una vez que el proyecto se haya creado, navega a la carpeta del proyecto:
 
-   ```bash
-   cd survey-app
-   ```
+  ```bash
+  cd survey-app
+  ```
 
 4. Abre el proyecto en tu editor de código favorito (por ejemplo, Visual Studio Code).
 
@@ -47,13 +55,13 @@ Antes de comenzar, asegúrate de tener instaladas las siguientes herramientas:
 Para agregar las herramientas necesarias para el formato y la validación del código, instala las siguientes dependencias:
 
 ```bash
-npm install eslint prettier cspell --save-dev
+pnpm add -D eslint prettier cspell
 ```
 
-También puedes instalar otros paquetes útiles si los necesitas en tu proyecto, como `axios` para hacer solicitudes HTTP si es necesario:
+También puedes instalar otros paquetes útiles si los necesitas en tu proyecto, como `axios` para hacer solicitudes HTTP (opcional):
 
 ```bash
-npm install axios
+pnpm add axios
 ```
 
 ## Paso 2: Configurar las Herramientas de Calidad de Código
@@ -62,20 +70,66 @@ npm install axios
 
 1. Inicializa la configuración de ESLint:
 
-   ```bash
-   npx eslint --init
-   ```
+  ```bash
+  pnpm eslint --init
+  ```
 
 2. Elige las opciones que más se ajusten a tus necesidades. Aquí hay algunas recomendaciones para las preguntas de configuración:
 
-   - **How would you like to use ESLint?**: To check syntax, find problems, and enforce code style
-   - **What type of modules does your project use?**: JavaScript modules (import/export)
-   - **Which framework does your project use?**: React
-   - **Does your project use TypeScript?**: Yes
-   - **Where does your code run?**: Browser
-   - **What format do you want your config file to be in?**: JavaScript
+  - **How would you like to use ESLint?**: To check syntax, find problems, and enforce code style
+  - **What type of modules does your project use?**: JavaScript modules (import/export)
+  - **Which framework does your project use?**: React
+  - **Does your project use TypeScript?**: Yes
+  - **Where does your code run?**: Browser
+  - **What format do you want your config file to be in?**: JavaScript
+
+  ```text
+  √ Would you like to install them now? · Yes
+  √ Which package manager do you want to use? · pnpm
+  ```
 
 3. Una vez configurado, ESLint te ayudará a mantener un estilo de código consistente y detectar problemas en el código.
+
+### 2.2 Configurar Prettier
+
+1. Crea un archivo de configuración de Prettier en la raíz de tu proyecto llamado `.prettierrc` con el siguiente contenido:
+
+  ```json
+  {
+    "semi": true,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "all"
+  }
+  ```
+
+2. Agrega un archivo `.prettierignore` para excluir archivos o carpetas que no quieras formatear automáticamente.
+
+### 2.3 Configurar Cspell
+
+1. Crea un archivo de configuración para Cspell llamado `cspell.json` con el siguiente contenido:
+
+  ```json
+  {
+    "version": "0.2",
+    "words": [
+     "Next",
+     "TypeScript",
+     "React",
+     "Vercel"
+    ]
+  }
+  ```
+
+2. Agrega un script en el archivo `package.json` para ejecutar Cspell fácilmente:
+
+  ```json
+  "scripts": {
+    "spellcheck": "cspell '**/*'"
+  }
+  ```
+
+Con estas configuraciones, tu proyecto estará listo para comenzar con un entorno optimizado utilizando **pnpm**.
 
 ### 2.2 Configurar Prettier
 
