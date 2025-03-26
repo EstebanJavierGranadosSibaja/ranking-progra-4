@@ -13,7 +13,7 @@ interface SurveyRankingProps {
 }
 
 const SurveyRanking: React.FC<SurveyRankingProps> = ({ analytics }) => {
-  const { votes, surveys, hasVoted } = useSurvey();
+  const { votes, surveys, hasVoted, isLoading } = useSurvey();
 
   const sortedSurveys = useMemo(() => {
     return surveys
@@ -25,30 +25,66 @@ const SurveyRanking: React.FC<SurveyRankingProps> = ({ analytics }) => {
       }));
   }, [surveys, votes, hasVoted]);
 
+  if (isLoading) {
+    return (
+      <div className="p-5 bg-card rounded-lg shadow">
+        <h2 className="text-2xl font-bold mb-4">Ranking de Encuestas</h2>
+        <p className="text-muted">Cargando ranking...</p>
+      </div>
+    );
+  }
+
+  const maxVotes = sortedSurveys.length > 0 ? Math.max(...sortedSurveys.map(s => s.voteCount)) : 0;
+
   return (
-    <div className="p-4 bg-white rounded-lg shadow">
+    <div className="p-5 bg-card rounded-lg shadow">
       <h2 className="text-2xl font-bold mb-4">Ranking de Encuestas</h2>
       {analytics && (
-        <div className="mb-4 p-3 bg-gray-50 rounded">
-          <p>Total de votos: {analytics.totalVotes}</p>
-          <p>Promedio de votos: {analytics.averageVotesPerSurvey.toFixed(2)}</p>
+        <div className="mb-5 p-4 bg-background rounded-md border border-border">
+          <div className="flex flex-wrap justify-between">
+            <div className="mb-2 mr-4">
+              <span className="text-muted text-sm">Total de votos</span>
+              <p className="text-2xl font-bold text-primary">{analytics.totalVotes}</p>
+            </div>
+            <div className="mb-2 mr-4">
+              <span className="text-muted text-sm">Encuestas</span>
+              <p className="text-2xl font-bold">{analytics.totalSurveys}</p>
+            </div>
+            <div className="mb-2">
+              <span className="text-muted text-sm">Promedio de votos</span>
+              <p className="text-2xl font-bold text-secondary">{analytics.averageVotesPerSurvey.toFixed(1)}</p>
+            </div>
+          </div>
         </div>
       )}
-      <ul className="space-y-2">
-        {sortedSurveys.map(({ id, title, voteCount, userVoted }) => (
-          <li key={id} className="p-2 border-b flex justify-between items-center">
-            <span className="font-medium">{title}</span>
-            <div className="flex items-center">
-              <span className="mr-2">{voteCount} votos</span>
-              {userVoted && (
-                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                  Votado
-                </span>
-              )}
-            </div>
-          </li>
-        ))}
-      </ul>
+      
+      {sortedSurveys.length === 0 ? (
+        <p className="text-muted text-center py-6">No hay encuestas disponibles para mostrar.</p>
+      ) : (
+        <ul className="space-y-3">
+          {sortedSurveys.map(({ id, title, voteCount, userVoted }) => (
+            <li key={id} className="p-3 border-b border-border hover:bg-background/50 transition-colors rounded-md">
+              <div className="flex justify-between items-center mb-2">
+                <span className="font-medium">{title}</span>
+                <div className="flex items-center">
+                  <span className="mr-2 font-bold text-foreground">{voteCount} {voteCount === 1 ? 'voto' : 'votos'}</span>
+                  {userVoted && (
+                    <span className="text-xs bg-accent/20 text-accent px-2 py-1 rounded-full">
+                      Votado
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="progress-bar">
+                <div 
+                  className="progress-bar-fill" 
+                  style={{ width: `${maxVotes ? (voteCount / maxVotes) * 100 : 0}%` }}
+                />
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };

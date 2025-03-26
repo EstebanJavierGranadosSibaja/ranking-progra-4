@@ -1,43 +1,48 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val: T) => T)) => void] {
-  // State to store our value
-  // Pass initial state function to useState so logic is only executed once
-  const [storedValue, setStoredValue] = useState<T>(() => {
-    if (typeof window === 'undefined') {
-      return initialValue;
-    }
-    
+  // Usar useRef para guardar el initialValue original y evitar re-evaluaciones
+  const initialValueRef = useRef(initialValue);
+  
+  // State para almacenar nuestro valor
+  const [storedValue, setStoredValue] = useState<T>(initialValue);
+  
+  // Inicializar el estado solo en el cliente después del montaje
+  // y solo una vez durante el ciclo de vida del componente
+  useEffect(() => {
     try {
-      // Get from local storage by key
+      // Verificar si estamos en el cliente
+      if (typeof window === 'undefined') return;
+      
+      // Obtener del local storage por clave
       const item = window.localStorage.getItem(key);
-      // Parse stored json or if none return initialValue
-      return item ? JSON.parse(item) : initialValue;
+      // Analizar el JSON almacenado o si no hay ninguno, devolver el valor inicial
+      if (item) {
+        setStoredValue(JSON.parse(item));
+      }
     } catch (error) {
-      // If error also return initialValue
-      console.error(error);
-      return initialValue;
+      console.error("Error reading from localStorage:", error);
     }
-  });
+  }, [key]); // Solo depende de key, no de initialValue
 
-  // Return a wrapped version of useState's setter function that
-  // persists the new value to localStorage.
+  // Función para actualizar el valor en localStorage
   const setValue = (value: T | ((val: T) => T)) => {
     try {
-      // Allow value to be a function so we have same API as useState
+      // Permitir que el valor sea una función para tener la misma API que useState
       const valueToStore =
         value instanceof Function ? value(storedValue) : value;
-      // Save state
+      
+      // Guardar estado
       setStoredValue(valueToStore);
-      // Save to local storage
+      
+      // Guardar en local storage
       if (typeof window !== 'undefined') {
         window.localStorage.setItem(key, JSON.stringify(valueToStore));
       }
     } catch (error) {
-      // A more advanced implementation would handle the error case
-      console.error(error);
+      console.error("Error saving to localStorage:", error);
     }
   };
 

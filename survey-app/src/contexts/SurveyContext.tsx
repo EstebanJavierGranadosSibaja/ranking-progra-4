@@ -1,13 +1,13 @@
 "use client";
 
-import React, { createContext, useContext, useMemo, useCallback } from 'react';
+import React, { createContext, useContext, useMemo, useCallback, useEffect, useState } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
 interface Survey {
   id: string;
   title: string;
   description?: string;
-  createdAt: Date;
+  createdAt: string;
 }
 
 interface SurveyContextType {
@@ -19,14 +19,41 @@ interface SurveyContextType {
   getTotalVotes: () => number;
   userVotes: string[]; 
   hasVoted: (surveyId: string) => boolean;
+  isLoading: boolean;
 }
 
 const SurveyContext = createContext<SurveyContextType | null>(null);
 
 export const SurveyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Usar un valor inicial simple para localStorage
   const [surveys, setSurveys] = useLocalStorage<Survey[]>('surveys', []);
   const [votes, setVotes] = useLocalStorage<Record<string, number>>('votes', {});
   const [userVotes, setUserVotes] = useLocalStorage<string[]>('userVotes', []);
+  
+  // Estado de carga separado
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Efecto para establecer isLoading a false después de la hidratación
+  useEffect(() => {
+    // No necesitamos setTimeout aquí, solo un único efecto
+    // para establecer isLoading a false después del montaje
+    setIsLoading(false);
+  }, []); // Array de dependencias vacío - solo ejecuta una vez
+
+  const hasVoted = useCallback((surveyId: string) => {
+    return userVotes.includes(surveyId);
+  }, [userVotes]);
+
+  const addVote = useCallback((surveyId: string) => {
+    if (!hasVoted(surveyId)) {
+      setVotes(prev => ({
+        ...prev,
+        [surveyId]: (prev[surveyId] || 0) + 1,
+      }));
+      
+      setUserVotes(prev => [...prev, surveyId]);
+    }
+  }, [setVotes, hasVoted, setUserVotes]);
 
   const addSurvey = useCallback((title: string, description?: string) => {
     setSurveys(prev => [
@@ -35,38 +62,22 @@ export const SurveyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         id: Date.now().toString(),
         title,
         description,
-        createdAt: new Date(),
+        createdAt: new Date().toISOString(),
       }
     ]);
   }, [setSurveys]);
 
-  const hasVoted = useCallback((surveyId: string) => {
-    return userVotes.includes(surveyId);
-  }, [userVotes]);
-
-  const addVote = useCallback((surveyId: string) => {
-    // Only add vote if user hasn't voted on this survey before
-    if (!hasVoted(surveyId)) {
-      setVotes(prev => ({
-        ...prev,
-        [surveyId]: (prev[surveyId] || 0) + 1,
-      }));
-      
-      // Record that this user has voted on this survey
-      setUserVotes(prev => [...prev, surveyId]);
-    }
-  }, [setVotes, hasVoted, setUserVotes]);
-
-  const getTopSurveys = useMemo(() => (limit?: number) => {
+  const getTopSurveys = useCallback((limit?: number) => {
     return [...surveys]
       .sort((a, b) => (votes[b.id] || 0) - (votes[a.id] || 0))
       .slice(0, limit);
   }, [surveys, votes]);
 
-  const getTotalVotes = useMemo(() => () => {
+  const getTotalVotes = useCallback(() => {
     return Object.values(votes).reduce((sum, count) => sum + count, 0);
   }, [votes]);
 
+  // Usar useCallback en lugar de useMemo para funciones
   const value = useMemo(() => ({
     surveys,
     addSurvey,
@@ -75,8 +86,19 @@ export const SurveyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     getTopSurveys,
     getTotalVotes,
     userVotes,
-    hasVoted
-  }), [surveys, addSurvey, votes, addVote, getTopSurveys, getTotalVotes, userVotes, hasVoted]);
+    hasVoted,
+    isLoading
+  }), [
+    surveys, 
+    addSurvey, 
+    votes, 
+    addVote, 
+    getTopSurveys, 
+    getTotalVotes, 
+    userVotes, 
+    hasVoted, 
+    isLoading
+  ]);
 
   return (
     <SurveyContext.Provider value={value}>
