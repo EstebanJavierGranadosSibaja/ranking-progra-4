@@ -17,7 +17,7 @@ interface SurveyContextType {
   addVote: (surveyId: string) => void;
   getTopSurveys: (limit?: number) => Survey[];
   getTotalVotes: () => number;
-  userVotes: string[]; 
+  userVotes: string[];
   hasVoted: (surveyId: string) => boolean;
   isLoading: boolean;
 }
@@ -25,20 +25,14 @@ interface SurveyContextType {
 const SurveyContext = createContext<SurveyContextType | null>(null);
 
 export const SurveyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Usar un valor inicial simple para localStorage
   const [surveys, setSurveys] = useLocalStorage<Survey[]>('surveys', []);
   const [votes, setVotes] = useLocalStorage<Record<string, number>>('votes', {});
   const [userVotes, setUserVotes] = useLocalStorage<string[]>('userVotes', []);
-  
-  // Estado de carga separado
   const [isLoading, setIsLoading] = useState(true);
-  
-  // Efecto para establecer isLoading a false después de la hidratación
+
   useEffect(() => {
-    // No necesitamos setTimeout aquí, solo un único efecto
-    // para establecer isLoading a false después del montaje
     setIsLoading(false);
-  }, []); // Array de dependencias vacío - solo ejecuta una vez
+  }, []);
 
   const hasVoted = useCallback((surveyId: string) => {
     return userVotes.includes(surveyId);
@@ -50,7 +44,6 @@ export const SurveyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         ...prev,
         [surveyId]: (prev[surveyId] || 0) + 1,
       }));
-      
       setUserVotes(prev => [...prev, surveyId]);
     }
   }, [setVotes, hasVoted, setUserVotes]);
@@ -77,7 +70,6 @@ export const SurveyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return Object.values(votes).reduce((sum, count) => sum + count, 0);
   }, [votes]);
 
-  // Usar useCallback en lugar de useMemo para funciones
   const value = useMemo(() => ({
     surveys,
     addSurvey,

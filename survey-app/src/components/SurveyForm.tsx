@@ -20,27 +20,27 @@ const SurveyForm: React.FC = () => {
   if (isLoading) {
     return (
       <div className="p-4 space-y-6 card">
-        <p className="text-muted">Cargando encuestas...</p>
+        <p className="text-muted">Loading surveys...</p>
       </div>
     );
   }
 
   return (
     <div className="p-4 space-y-6 card">
-      <h2 className="text-xl font-semibold mb-4">Crear Nueva Encuesta</h2>
+      <h2 className="text-xl font-semibold mb-4">Create New Survey</h2>
       <form onSubmit={handleSubmitNew} className="space-y-4">
         <div>
           <input
             type="text"
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
-            placeholder="Título de nueva encuesta"
+            placeholder="New survey title"
             className="w-full p-2 border rounded focus:ring-2 focus:ring-primary focus:border-primary"
           />
           <textarea
             value={newDescription}
             onChange={(e) => setNewDescription(e.target.value)}
-            placeholder="Descripción (opcional)"
+            placeholder="Description (optional)"
             className="w-full p-2 border rounded mt-2 focus:ring-2 focus:ring-primary focus:border-primary"
             rows={3}
           />
@@ -48,15 +48,15 @@ const SurveyForm: React.FC = () => {
             type="submit"
             className="mt-3 px-4 py-2 bg-primary text-white rounded hover:bg-primary-hover transition-colors"
           >
-            Crear Encuesta
+            Create Survey
           </button>
         </div>
       </form>
 
       <div className="space-y-3 mt-6">
-        <h3 className="font-bold text-lg">Encuestas Disponibles</h3>
+        <h3 className="font-bold text-lg">Available Surveys</h3>
         {surveys.length === 0 ? (
-          <p className="text-muted">No hay encuestas disponibles.</p>
+          <p className="text-muted">No surveys available.</p>
         ) : (
           surveys.map(survey => {
             const alreadyVoted = hasVoted(survey.id);
@@ -78,7 +78,7 @@ const SurveyForm: React.FC = () => {
                     }`}
                     disabled={alreadyVoted}
                   >
-                    {alreadyVoted ? '✓ Votado' : 'Votar'}
+                    {alreadyVoted ? '✓ Voted' : 'Vote'}
                   </button>
                 </div>
               </div>
